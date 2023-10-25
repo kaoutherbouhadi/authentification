@@ -2,7 +2,7 @@
 # Ignore les dépendances installées via npm (dossier node_modules)
 # Ignore le fichier package-lock.json
 
-
+node_modules/
 # Ignore les fichiers de sauvegarde et fichiers temporaires
 *~
 .swp
