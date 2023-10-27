@@ -4,6 +4,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const Eureka = require('eureka-js-client').Eureka;
+
+
 
 function generateAuthToken(user) {
     const token = jwt.sign({ _id: user._id, username: user.username }, 'votre_clé_secrète');
@@ -36,6 +39,40 @@ const userSchema = new mongoose.Schema({
     role: { type: String } // Ne pas définir comme "required"
   });
   
+// Configuration d'Eureka Client
+// Configuration d'Eureka Client
+const client = new Eureka({
+    instance: {
+      app: 'app', // Le nom de votre service
+      hostName: 'localhost', // Adresse IP de votre service Node.js
+      ipAddr: '127.0.0.1', // Adresse IP de votre service Node.js
+      port: {
+        '$': PORT,
+        '@enabled': 'true',
+      },
+      vipAddress: 'app', // Le nom de votre service Eureka
+      dataCenterInfo: {
+        '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
+        name: 'MyOwn',
+      },
+    },
+    eureka: {
+      host: 'localhost', // L'adresse de votre Eureka Server
+      port: 8761, // Le port par défaut d'Eureka Server
+      servicePath: '/eureka/apps/',
+    },
+  });
+  
+app.get('/', (req, res) => {
+  res.send('Bienvenue sur le microservice Node.js.');
+});
+
+client.logger.level('debug');
+client.start();
+
+client.on('started', () => {
+    console.log('Service enregistré avec succès auprès d\'Eureka.');
+});
 
 const User = mongoose.model('User', userSchema);
 
@@ -87,7 +124,21 @@ app.post('/users', async (req, res) => {
       res.status(500).json({ message: 'Une erreur est survenue lors de l\'inscription.' });
   }
 });
-//client.start();
-app.listen(PORT, () => {
+// Ajoutez une route pour accéder à la table "User"
+app.get('/user', async (req, res) => {
+    try {
+      // Utilisez Mongoose ou un autre ORM pour récupérer les données de la table "User"
+      const users = await User.find();
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ message: 'Une erreur est survenue lors de la récupération des utilisateurs.' });
+    }
+  });
+  
+
+app.get('/', (req, res) => {
+    res.send('Bienvenue sur le microservice Node.js.');
+  });
+  app.listen(PORT, () => {
     console.log(`Serveur en cours d'écoute sur le port ${PORT}`);
 });
