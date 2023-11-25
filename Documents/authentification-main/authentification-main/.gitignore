@@ -20,6 +20,117 @@ node_modules/
 /dist/
 /out/
 /build/
-.*
-!.gitignore
+       ../../../.BigNox/
+        ../../../.VirtualBox/
+        ../../../.android/
+        ../../../.bash_history
+        ../../../.cache/
+        ../../../.condarc
+        ../../../.continuum/
+        ../../../.docker/
+        ../../../.eclipse/
+        ../../../.emulator_console_auth_token
+        ../../../.gitconfig
+        ../../../.gradle/
+        ../../../.ipython/
+        ../../../.jdks/
+        ../../../.lesshst
+        ../../../.m2/
+        ../../../.matplotlib/
+        ../../../.node-red/
+        ../../../.node_repl_history
+        ../../../.p2/
+        ../../../.spyder-py3/
+        ../../../.ssh/
+        ../../../.vscode/
+        ../../../.vue-cli-ui/
+        ../../../.vuerc
+        ../../../3D Objects/
+        ../../../AndroidStudioProjects/
+        ../../../AppData/
+        ../../../Contacts/
+        ../../../Desktop/
+        ../../Anaconda/
+        ../../Conception/
+        ../../DB/
+        ../../Etude de cas SI/
+        ../../SGBD2/
+        ../../SOA/
+        ../../Sprint2/
+        ../../UML/
+        ../../atelier1/
+        ../../authentification-main - Copy/
+        ../../authentification/
+        "../../baseDonn\303\251es.GIF"
+        ../../certif/
+        ../../classDiagramm.GIF
+        ../../clubs/
+        ../../compteRendue/
+        ../../connexionReussite.GIF
+        ../../desktop.ini
+        ../../diagrameeclassCreatacc.GIF
+        ../../eureka.GIF
+        ../../event/
+        ../../flutterAt1/
+        ../../formation/
+        ../../gateway.GIF
+        ../../inscriptionEleve.GIF
+        ../../inscritNonreussite.GIF
+        ../../jdk-18.0.2.1_windows-x64_bin.msi
+        ../../kaoutherBouhadiDSI21.rar
+        "../../la fiche Client (point de d\303\251part.GIF"
+        ../../mdpIncorrect.GIF
+        ../../my-project/
+        ../../myprogram.java
+        ../../particioant.GIF
+        ../../poo/
+        ../../projet-laravel-vue.rar
+        ../../projet-laravel-vue/
+        ../../python.rar
+        ../../python/
+        ../../sneat-1.0.0/
+        ../../sprint1.rar
+        ../../sprint1/
+        ../../userNameIncorrect.GIF
+        ../../../Downloads/
+        ../../../Favorites/
+        ../../../Gateway-service/
+        ../../../IdeaProjects/
+        ../../../IntelGraphicsProfiles/
+        ../../../Jedi/
+        ../../../Links/
+        ../../../Music/
+        ../../../NTUSER.DAT
+        ../../../NTUSER.DAT{53b39e88-18c4-11ea-a811-000d3aa4692b}.TM.blf
+        ../../../NTUSER.DAT{53b39e88-18c4-11ea-a811-000d3aa4692b}.TMContainer00000000000000000001.regtrans-ms  
+        ../../../NTUSER.DAT{53b39e88-18c4-11ea-a811-000d3aa4692b}.TMContainer00000000000000000002.regtrans-ms  
+        ../../../OneDrive/
+        ../../../Pictures/
+        ../../../Produits/
+        ../../../Saved Games/
+        ../../../Searches/
+        ../../../Videos/
+        ../../../VirtualBox VMs/
+        ../../../billing-service/
+        ../../../customer-service/
+        ../../../d4ac4633ebd6440fa397b84f1bc94a3c.7z
+        ../../../demo1.rar
+        ../../../demo1/
+        ../../../eclipse-workspace/
+        ../../../eclipse/
+        ../../../edu-meeting/
+        ../../../eureka/
+        ../../../inittk.ini
+        ../../../inst.ini
+        ../../../integrationTest/
+        ../../../inventory-service/
+        ../../../inventory/
+        ../../../my-project/
+        ../../../ntuser.dat.LOG1
+        ../../../ntuser.dat.LOG2
+        ../../../ntuser.ini
+        ../../../nuuid.ini
+        ../../../projetIntegr/
+        ../../../useruid.ini
+        ../../../vmlogs/
 
