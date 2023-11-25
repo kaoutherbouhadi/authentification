@@ -1,0 +1,22 @@
+
+# Ignore les dépendances installées via npm (dossier node_modules)
+# Ignore le fichier package-lock.json
+
+node_modules/
+# Ignore les fichiers de sauvegarde et fichiers temporaires
+*~
+.swp
+.DS_Store
+.vscode/
+
+# Ignore les fichiers de configuration personnelle
+.env
+
+# Ignore les fichiers journaux
+/logs/
+*.log
+
+# Ignore les fichiers générés lors de la compilation
+/dist/
+/out/
+/build/
