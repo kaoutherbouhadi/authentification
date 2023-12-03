@@ -4,6 +4,25 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const Eureka = require('eureka-js-client').Eureka;
 const cors = require('cors');  // Ajoutez cette ligne pour utiliser le middleware CORS
+const tokenBlacklist = [];
+
+// Middleware pour vérifier le token
+const authenticateToken = (req, res, next) => {
+    const token = req.header('Authorization');
+    if (!token) return res.status(401).json({ message: 'Accès refusé' });
+
+    // Vérifier si le token est dans la liste noire
+    if (tokenBlacklist.includes(token)) {
+        return res.status(403).json({ message: 'Token invalide' });
+    }
+
+    jwt.verify(token, 'votre_clé_secrète', (err, user) => {
+        if (err) return res.status(403).json({ message: 'Token non valide' });
+        req.user = user;
+        next();
+    });
+};
+
 
 function generateAuthToken(user) {
     const token = jwt.sign({ _id: user._id, username: user.username }, 'votre_clé_secrète');
@@ -32,14 +51,16 @@ mongoose.connect('mongodb://127.0.0.1:27017/users', {
 
 // Schéma et modèle MongoDB pour les livres
 const userSchema = new mongoose.Schema({
+    numInscrit: { type: Number, unique: true, required: true },
     username: { type: String, required: true },
     password: { type: String, required: true },
     email: { type: String, required: true },
     role: { type: String } ,
-    etat: { type: Number, default: 0 }
+    etat: { type: Number, default: 0 },
+    userClasse: { type: String }
 });
 
-// Configuration d'Eureka Client
+
 // Configuration d'Eureka Client
 const client = new Eureka({
     instance: {
@@ -109,7 +130,7 @@ app.post('/signIn', async (req, res) => {
 
 // Route d'inscription (signUp)
 app.post('/users', async (req, res) => {
-    const { username, password, email } = req.body;
+    const { username, password, email, numInscrit, userClasse } = req.body;
 
     try {
         // Vérifiez si l'utilisateur existe déjà
@@ -120,7 +141,13 @@ app.post('/users', async (req, res) => {
         }
 
         // Créez un nouvel utilisateur
-        const newUser = new User({ username, password, email });
+        const newUser = new User({
+            username,
+            password,
+            email,
+            numInscrit,  // Ajoutez le champ numInscrit ici
+            userClasse, // Ajoutez le champ userClasse ici
+        });
 
         // Enregistrez le nouvel utilisateur
         await newUser.save();
@@ -131,6 +158,7 @@ app.post('/users', async (req, res) => {
         res.status(500).json({ message: 'Une erreur est survenue lors de l\'inscription.' });
     }
 });
+
 // Ajoutez une route pour accéder à la table "User"
 app.get('/user', async (req, res) => {
     try {
@@ -140,9 +168,7 @@ app.get('/user', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Une erreur est survenue lors de la récupération des utilisateurs.' });
     }
-});
-
-// ... (votre code existant)
+})
 
 // Route pour accepter un utilisateur
 app.put('/api/users/accept/:userId', async (req, res) => {
@@ -159,7 +185,7 @@ app.put('/api/users/accept/:userId', async (req, res) => {
     }
 });
 
-// Route pour refuser un utilisateur
+
 // Route pour refuser un utilisateur
 app.delete('/api/users/reject/:userId', async (req, res) => {
     const userId = req.params.userId;
@@ -176,10 +202,12 @@ app.delete('/api/users/reject/:userId', async (req, res) => {
 });
 
 
-
-app.get('/', (req, res) => {
-    res.send('Bienvenue sur le microservice Node.js.');
+// Route de déconnexion
+app.post('/logout', (req, res) => {
+   
+    res.json({ message: 'Déconnexion réussie' });
 });
+
 app.listen(PORT, () => {
     console.log(`Serveur en cours d'écoute sur le port ${PORT}`);
 });
