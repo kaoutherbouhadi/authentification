@@ -6,6 +6,7 @@ const Eureka = require('eureka-js-client').Eureka;
 const cors = require('cors');  // Ajoutez cette ligne pour utiliser le middleware CORS
 const tokenBlacklist = [];
 
+
 // Middleware pour vérifier le token
 const authenticateToken = (req, res, next) => {
     const token = req.header('Authorization');
@@ -55,7 +56,7 @@ const userSchema = new mongoose.Schema({
     username: { type: String, required: true },
     password: { type: String, required: true },
     email: { type: String, required: true },
-    role: { type: String } ,
+    role: { type: String, default:"eleve" } ,
     etat: { type: Number, default: 0 },
     userClasse: { type: String }
 });
@@ -98,6 +99,36 @@ client.on('started', () => {
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
+// creation d'un admin
+async function createAdminUser() {
+    try {
+        // Check if the admin user already exists
+        const existingAdmin = await User.findOne({ username: 'admin', role: 'admin' });
+
+        if (!existingAdmin) {
+            // Create a new admin user
+            // const hashedPassword = await bcrypt.hash('admin', 10);
+            const adminUser = new User({
+                username: 'admin',
+                numInscrit: 1,
+                password: 'admin', // You should hash passwords in a real-world scenario
+                email: 'admin@example.com',
+                role: 'admin',
+                etat: 1,  // Assuming admin is automatically accepted
+            });
+
+            // Save the admin user to the database
+            await adminUser.save();
+
+            console.log('Admin user created successfully.');
+        } else {
+            console.log('Admin user already exists.');
+        }
+    } catch (error) {
+        console.error('Error creating admin user:', error);
+    }
+}
+createAdminUser();
 // Route d'inscription (signUp)
 app.post('/signIn', async (req, res) => {
     const { username, password } = req.body;
@@ -122,7 +153,10 @@ app.post('/signIn', async (req, res) => {
 
         // Generate and send the authentication token
         const token = generateAuthToken(user);
-        res.status(200).json({ message: 'Connexion réussie', token });
+        if (user.role === 'eleve') {
+            return res.status(200).json({ message: 'Connexion réussie', token, etat: user.etat, username:user.username,useremail:user.email, role: user.role, redirect: '/eleve-page' });
+        }
+        res.status(200).json({ message: 'Connexion réussie', token, etat: user.etat, username:user.username,useremail:user.email, role: user.role });
     } catch (error) {
         res.status(500).json({ message: 'Une erreur est survenue lors de la connexion.' });
     }
@@ -156,6 +190,21 @@ app.post('/users', async (req, res) => {
     } catch (error) {
         console.error('Erreur d\'inscription :', error);
         res.status(500).json({ message: 'Une erreur est survenue lors de l\'inscription.' });
+    }
+});
+
+app.get('/user-statistics', async (req, res) => {
+    try {
+        // Count the total number of users
+        const totalUsers = await User.countDocuments();
+
+        // Count the number of active users (etat = 1)
+        const activeUsers = await User.countDocuments({ etat: 1 });
+
+        res.status(200).json({ totalUsers, activeUsers });
+    } catch (error) {
+        console.error('Error fetching user statistics:', error);
+        res.status(500).json({ message: 'An error occurred while fetching user statistics.' });
     }
 });
 
