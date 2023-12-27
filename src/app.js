@@ -40,7 +40,7 @@ app.use(bodyParser.json());
 app.use(cors());  // Ajoutez cette ligne pour permettre les requêtes CORS
 
 // Connexion à la base de données MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/users', {
+mongoose.connect('mongodb://127.0.0.1:27017/Education', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 }).then(() => {
@@ -56,11 +56,31 @@ const userSchema = new mongoose.Schema({
     username: { type: String, required: true },
     password: { type: String, required: true },
     email: { type: String, required: true },
-    role: { type: String, default:"eleve" } ,
+    role: { type: String,required: true, enum: ['eleve', 'enseignant', 'admin'] } ,
     etat: { type: Number, default: 0 },
     userClasse: { type: String }
 });
+const eleveSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true },
+    role: { type: String, default: 'eleve' },
+    etat: { type: Number, default: 0 },
+    numInscrit: { type: String, required: true, unique: true},
+    userClasse: { type: mongoose.Schema.Types.ObjectId, ref: 'Classe', required: true },
+});
 
+const Eleve = mongoose.model('Eleve', eleveSchema);
+
+const enseignantSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    role: { type: String, default: 'enseignant' },
+    matiere: { type: String },
+});
+
+const Enseignant = mongoose.model('Enseignant', enseignantSchema);
 
 // Configuration d'Eureka Client
 const client = new Eureka({
@@ -134,57 +154,76 @@ app.post('/signIn', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        // Recherchez l'utilisateur dans la base de données par nom d'utilisateur
-        const user = await User.findOne({ username });
+        // Vérifiez d'abord si l'utilisateur est un enseignant
+        let user = await Enseignant.findOne({ username });
+
+        if (!user) {
+            // Si ce n'est pas un enseignant, vérifiez s'il s'agit d'un étudiant
+            user = await Eleve.findOne({ username });
+            
+            // Vérifiez si l'utilisateur est un élève et si son état est actif
+            if (user && user.etat !== 1) {
+                return res.status(401).json({ message: 'L\'étudiant n\'est pas actif.' });
+            }
+        }
+
+        if (!user) {
+            // Si ce n'est pas un étudiant, vérifiez s'il s'agit d'un utilisateur régulier
+            user = await User.findOne({ username });
+        }
 
         if (!user) {
             return res.status(401).json({ message: 'Nom d\'utilisateur incorrect.' });
         }
 
-        // Check if the user's etat is 1 (accepted)
-        if (user.etat !== 1) {
-            return res.status(401).json({ message: 'L\'utilisateur n\'a pas encore été accepté.' });
-        }
-
-        // Comparez le mot de passe stocké avec le mot de passe fourni
         if (password !== user.password) {
             return res.status(401).json({ message: 'Mot de passe incorrect.' });
         }
 
-        // Generate and send the authentication token
-        const token = generateAuthToken(user);
-        if (user.role === 'eleve') {
-            return res.status(200).json({ message: 'Connexion réussie', token, etat: user.etat, username:user.username,useremail:user.email, role: user.role, redirect: '/eleve-page' });
+        // Authentification réussie
+        let userType = 'unknown';
+        if (user instanceof Enseignant) {
+            userType = 'enseignant';
+        } else if (user instanceof Eleve) {
+            userType = 'eleve';
+        } else if (user instanceof User) {
+            userType = 'user';
         }
-        res.status(200).json({ message: 'Connexion réussie', token, etat: user.etat, username:user.username,useremail:user.email, role: user.role });
+
+        res.status(200).json({ message: 'Connexion réussie', userType, userId: user._id , username , password});
+
     } catch (error) {
         res.status(500).json({ message: 'Une erreur est survenue lors de la connexion.' });
     }
 });
 
+
+
+
+
 // Route d'inscription (signUp)
-app.post('/users', async (req, res) => {
+app.post('/signup', async (req, res) => {
     const { username, password, email, numInscrit, userClasse } = req.body;
 
     try {
         // Vérifiez si l'utilisateur existe déjà
-        const existingUser = await User.findOne({ username });
+        const existingUser = await Eleve.findOne({ username });
 
         if (existingUser) {
             return res.status(400).json({ message: 'Cet utilisateur existe déjà.' });
         }
 
-        // Créez un nouvel utilisateur
-        const newUser = new User({
+        // Créez un nouvel utilisateur eleve
+        const newEleve = new Eleve({
             username,
             password,
             email,
-            numInscrit,  // Ajoutez le champ numInscrit ici
-            userClasse, // Ajoutez le champ userClasse ici
+            numInscrit,
+            userClasse,
         });
 
-        // Enregistrez le nouvel utilisateur
-        await newUser.save();
+        // Enregistrez le nouvel utilisateur eleve
+        await newEleve.save();
 
         res.status(201).json({ message: 'Inscription réussie' });
     } catch (error) {
@@ -192,6 +231,8 @@ app.post('/users', async (req, res) => {
         res.status(500).json({ message: 'Une erreur est survenue lors de l\'inscription.' });
     }
 });
+
+
 
 app.get('/user-statistics', async (req, res) => {
     try {
