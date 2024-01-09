@@ -253,7 +253,7 @@ app.get('/user-statistics', async (req, res) => {
 app.get('/user', async (req, res) => {
     try {
         // Utilisez Mongoose ou un autre ORM pour récupérer les données de la table "User"
-        const users = await User.find();
+        const users = await Eleve.find();
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: 'Une erreur est survenue lors de la récupération des utilisateurs.' });
@@ -266,7 +266,7 @@ app.put('/api/users/accept/:userId', async (req, res) => {
 
     try {
         // Mettez à jour l'état de l'utilisateur à 1 dans la base de données
-        await User.findByIdAndUpdate(userId, { $set: { etat: 1 } });
+        await Eleve.findByIdAndUpdate(userId, { $set: { etat: 1 } });
 
         res.status(200).json({ message: 'L\'utilisateur a été accepté avec succès.' });
     } catch (error) {
@@ -282,7 +282,7 @@ app.delete('/api/users/reject/:userId', async (req, res) => {
 
     try {
         // Supprimez l'utilisateur de la base de données
-        await User.findByIdAndRemove(userId);
+        await Eleve.findByIdAndRemove(userId);
 
         res.status(200).json({ message: 'L\'utilisateur a été refusé avec succès.' });
     } catch (error) {
